@@ -1,0 +1,99 @@
+/* fallout3.css */
+
+.fallout3-menu-row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 0.4em;
+}
+.fallout3-menu-row .nav-link {
+    flex: 1 1 0;
+    margin: 0;
+    text-align: center;
+    border-radius: 0;
+    border-left: 1px solid #145b11;
+    border-top: 1px solid #145b11;
+    border-bottom: 1px solid #145b11;
+    border-right: none;
+    background: #073605;
+    color: #fff;
+    font-weight: 500;
+    font-size: 0.97rem;
+    transition: background 0.15s, color 0.15s;
+    padding: 0.44em 0;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+.fallout3-menu-row .nav-link:last-child {
+    border-right: 1px solid #145b11;
+}
+.fallout3-menu-row .nav-link:hover,
+.fallout3-menu-row .nav-link:focus,
+.fallout3-menu-row .nav-link.active {
+    background: #199515;
+    color: #fff;
+    font-weight: 600;
+}
+.fallout3-menu-row .nav-link.invisible {
+    visibility: hidden !important;
+    pointer-events: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    display: block;
+}
+
+.fallout3-menu-row .nav-link:not(.invisible):last-of-type {
+    border-right: 1px solid #145b11;
+}
+
+.fallout3-menu-row .nav-link:first-child {
+    border-radius: 1em 0 0 1em;
+}
+
+.fallout3-menu-row .nav-link:not(.invisible):last-of-type {
+    border-radius: 0 1em 1em 0;
+}
+
+.quest-banner, .skillbook-banner, .bobblehead-banner {
+    width: 100%;
+    background: linear-gradient(
+      90deg,
+      #073605 0%,
+      #0e4e0b 25%,
+      #145b11 50%,
+      #146c11 75%,
+      #199515 100%
+    );
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.5rem;
+    padding: 1em 2em 1em 1.3em;
+    border-radius: 1.2em 0.8em 0.8em 1.2em;
+    box-shadow: 2px 4px 18px rgba(60,60,60,0.10);
+    letter-spacing: 1.2px;
+    margin-bottom: 14px;
+    display: block;
+    margin-top: 3rem;
+}
+.table-responsive {
+    margin-bottom: 2rem;
+}
+.count-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+}
+.count-controls button {
+    padding: 2px 10px;
+}
+.count-controls input {
+    width: 2.5em;
+    text-align: center;
+    margin: 0 0.2em;
+    border: none;
+    background: #f8f9fa;
+    font-weight: bold;
+}

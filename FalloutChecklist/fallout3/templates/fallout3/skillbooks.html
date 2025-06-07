@@ -1,0 +1,112 @@
+{% extends "fallout3_base.html" %}
+
+{% block title %}Fallout 3 - Skill Books{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Skill Books</h2>
+<div class="skillbook-banner">
+    Skill Books
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle datatable">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Name</th>
+                <th>Count Found</th>
+                <th>Count Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in skillbooks %}
+            <tr>
+                <td>{{ book.id }}</td>
+                <td>{{ book.title }}</td>
+                <td>{{ book.name }}</td>
+                <td>
+                    <div class="count-controls" data-id="{{ book.id }}">
+                        <button class="btn btn-sm btn-outline-secondary minus" {% if book.count_found <= 0 %}disabled{% endif %}>&minus;</button>
+                        <input type="text" class="form-control form-control-sm count-value" value="{{ book.count_found }}" readonly>
+                        <button class="btn btn-sm btn-outline-secondary plus" {% if book.count_found >= book.count_total %}disabled{% endif %}>&#43;</button>
+                    </div>
+                </td>
+                <td>{{ book.count_total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function() {
+    $(".count-controls").each(function() {
+        var controls = $(this);
+        var id = controls.data("id");
+        var minusBtn = controls.find(".minus");
+        var plusBtn = controls.find(".plus");
+        var valueInput = controls.find(".count-value");
+
+        minusBtn.click(function() {
+            $.ajax({
+                url: "{% url 'update_skillbook_count' %}",
+                method: "POST",
+                data: {
+                    'id': id,
+                    'direction': 'down',
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if(data.success){
+                        valueInput.val(data.count_found);
+                        if(data.count_found <= 0) minusBtn.prop('disabled', true);
+                        else minusBtn.prop('disabled', false);
+                        if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))
+                            plusBtn.prop('disabled', true);
+                        else
+                            plusBtn.prop('disabled', false);
+                    }
+                }
+            });
+        });
+
+        plusBtn.click(function() {
+            $.ajax({
+                url: "{% url 'update_skillbook_count' %}",
+                method: "POST",
+                data: {
+                    'id': id,
+                    'direction': 'up',
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if(data.success){
+                        valueInput.val(data.count_found);
+                        if(data.count_found <= 0) minusBtn.prop('disabled', true);
+                        else minusBtn.prop('disabled', false);
+                        if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))
+                            plusBtn.prop('disabled', true);
+                        else
+                            plusBtn.prop('disabled', false);
+                    }
+                }
+            });
+        });
+    });
+
+    var table = $('.datatable').DataTable({
+        "order": [[0, "asc"]],
+        "paging": false,
+    });
+
+    // Add a "Reset Order" button above the table
+    $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>')
+        .insertBefore('.datatable')
+        .click(function() {
+            table.order([0, 'asc']).draw();
+        });
+});
+</script>
+{% endblock %}

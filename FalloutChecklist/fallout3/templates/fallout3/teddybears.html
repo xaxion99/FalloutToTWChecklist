@@ -1,0 +1,116 @@
+{% extends "fallout3_base.html" %}
+
+{% block title %}Fallout 3 - Teddy Bears{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Teddy Bears</h2>
+{% for title, bears in grouped.items %}
+  <div class="quest-section">
+    <div class="quest-banner">
+      {{ title }}
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>ID</th>
+            <th>Location</th>
+            <th>Notes</th>
+            <th>Count Found</th>
+            <th>Count Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bear in bears %}
+          <tr>
+            <td>{{ bear.id }}</td>
+            <td>{{ bear.location }}</td>
+            <td>{{ bear.notes }}</td>
+            <td>
+              <div class="count-controls" data-id="{{ bear.id }}">
+                <button class="btn btn-sm btn-outline-secondary minus" {% if bear.count_found <= 0 %}disabled{% endif %}>&minus;</button>
+                <input type="text" class="form-control form-control-sm count-value" value="{{ bear.count_found }}" readonly>
+                <button class="btn btn-sm btn-outline-secondary plus" {% if bear.count_found >= bear.count_total %}disabled{% endif %}>&#43;</button>
+              </div>
+            </td>
+            <td>{{ bear.count_total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function() {
+    $(".count-controls").each(function() {
+        var controls = $(this);
+        var id = controls.data("id");
+        var minusBtn = controls.find(".minus");
+        var plusBtn = controls.find(".plus");
+        var valueInput = controls.find(".count-value");
+
+        minusBtn.click(function() {
+            $.ajax({
+                url: "{% url 'update_teddybear_count' %}",
+                method: "POST",
+                data: {
+                    'id': id,
+                    'direction': 'down',
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if(data.success){
+                        valueInput.val(data.count_found);
+                        if(data.count_found <= 0) minusBtn.prop('disabled', true);
+                        else minusBtn.prop('disabled', false);
+                        if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))
+                            plusBtn.prop('disabled', true);
+                        else
+                            plusBtn.prop('disabled', false);
+                    }
+                }
+            });
+        });
+
+        plusBtn.click(function() {
+            $.ajax({
+                url: "{% url 'update_teddybear_count' %}",
+                method: "POST",
+                data: {
+                    'id': id,
+                    'direction': 'up',
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(data) {
+                    if(data.success){
+                        valueInput.val(data.count_found);
+                        if(data.count_found <= 0) minusBtn.prop('disabled', true);
+                        else minusBtn.prop('disabled', false);
+                        if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))
+                            plusBtn.prop('disabled', true);
+                        else
+                            plusBtn.prop('disabled', false);
+                    }
+                }
+            });
+        });
+    });
+
+    $('.datatable').each(function() {
+        var table = $(this).DataTable({
+            "order": [[0, "asc"]],
+            "paging": false,
+        });
+        var $resetBtn = $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>');
+        $resetBtn.insertBefore($(this));
+        $resetBtn.click(function() {
+            table.order([0, 'asc']).draw();
+        });
+    });
+});
+</script>
+{% endblock %}

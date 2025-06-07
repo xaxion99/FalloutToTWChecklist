@@ -1,0 +1,72 @@
+{% extends "fallout3_base.html" %}
+
+{% block title %}Fallout 3 - Bobbleheads{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Bobbleheads</h2>
+<div class="bobblehead-banner">
+    Bobbleheads
+</div>
+<div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle datatable">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Acquired</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bob in bobbleheads %}
+            <tr>
+                <td>{{ bob.id }}</td>
+                <td>{{ bob.name }}</td>
+                <td>{{ bob.location }}</td>
+                <td>
+                    <input type="checkbox" class="bobblehead-toggle" data-id="{{ bob.id }}" {% if bob.acquired %}checked{% endif %}>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function() {
+    $(".bobblehead-toggle").change(function() {
+        var bobId = $(this).data("id");
+        var value = $(this).is(":checked");
+        $.ajax({
+            url: "{% url 'toggle_bobblehead_field' %}",
+            method: "POST",
+            data: {
+                'id': bobId,
+                'value': value,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                // Optionally show a success message
+            },
+            error: function() {
+                alert("Failed to update bobblehead!");
+            }
+        });
+    });
+
+    var table = $('.datatable').DataTable({
+        "order": [[0, "asc"]],
+        "paging": false,
+    });
+
+    // Add a "Reset Order" button above the table
+    $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>')
+        .insertBefore('.datatable')
+        .click(function() {
+            table.order([0, 'asc']).draw();
+        });
+});
+</script>
+{% endblock %}

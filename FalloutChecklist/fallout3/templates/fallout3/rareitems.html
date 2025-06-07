@@ -1,0 +1,78 @@
+{% extends "fallout3_base.html" %}
+
+{% block title %}Fallout 3 - Rare Items{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Rare Items</h2>
+{% for title, items in grouped.items %}
+  <div class="quest-section">
+    <div class="quest-banner">
+      {{ title }}
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>ID</th>
+            <th>Note</th>
+            <th>Acquired</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.note }}</td>
+            <td>
+              <input type="checkbox" class="rareitem-toggle" data-id="{{ item.id }}" {% if item.acquired %}checked{% endif %}>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% empty %}
+  <p>No rare items found.</p>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function() {
+    $(".rareitem-toggle").change(function() {
+        var itemId = $(this).data("id");
+        var value = $(this).is(":checked");
+        $.ajax({
+            url: "{% url 'toggle_rareitem_field' %}",
+            method: "POST",
+            data: {
+                'id': itemId,
+                'value': value,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                // Optionally show a success message
+            },
+            error: function() {
+                alert("Failed to update rare item!");
+            }
+        });
+    });
+
+    // DataTables for each table in case you have multiple groups
+    $('.datatable').each(function() {
+        var table = $(this).DataTable({
+            "order": [[0, "asc"]],
+            "paging": false,
+        });
+        // Add a "Reset Order" button above each table
+        var $resetBtn = $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>');
+        $resetBtn.insertBefore($(this));
+        $resetBtn.click(function() {
+            table.order([0, 'asc']).draw();
+        });
+    });
+});
+</script>
+{% endblock %}

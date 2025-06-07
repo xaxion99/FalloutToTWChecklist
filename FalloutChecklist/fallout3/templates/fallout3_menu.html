@@ -1,0 +1,21 @@
+<!--fallout3_menu.html -->
+{% load extra_filters %}
+{% with total=menu_items|length %}
+    {% for row in menu_items|chunks:5 %}
+        {% with missing=5|add:"-"|add:row|length %}
+            <div class="fallout3-menu-row">
+                {% for label, url_name in row %}
+                    <a class="nav-item nav-link {% if url_name == active_menu %}active{% endif %}" href="{% url url_name %}">
+                        {{ label }}
+                    </a>
+                {% endfor %}
+                {% if missing > 0 %}
+                    {% for _ in ""|center:missing %}
+                        <span class="nav-item nav-link invisible"></span>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endwith %}
+    {% endfor %}
+{% endwith %}
+

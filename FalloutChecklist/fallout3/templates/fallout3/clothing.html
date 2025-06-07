@@ -1,0 +1,74 @@
+{% extends "fallout3_base.html" %}
+
+{% block title %}Fallout 3 - Clothing{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Clothing</h2>
+{% for title, items in grouped.items %}
+  <div class="quest-section">
+    <div class="quest-banner">
+      {{ title }}
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Acquired</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            <td>
+              <input type="checkbox" class="clothing-toggle" data-id="{{ item.id }}" {% if item.acquired %}checked{% endif %}>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function() {
+    $(".clothing-toggle").change(function() {
+        var clothingId = $(this).data("id");
+        var value = $(this).is(":checked");
+        $.ajax({
+            url: "{% url 'toggle_clothing_field' %}",
+            method: "POST",
+            data: {
+                'id': clothingId,
+                'value': value,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                // Optionally show a success message
+            },
+            error: function() {
+                alert("Failed to update clothing!");
+            }
+        });
+    });
+
+    $('.datatable').each(function() {
+        var table = $(this).DataTable({
+            "order": [[0, "asc"]],
+            "paging": false,
+        });
+        var $resetBtn = $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>');
+        $resetBtn.insertBefore($(this));
+        $resetBtn.click(function() {
+            table.order([0, 'asc']).draw();
+        });
+    });
+});
+</script>
+{% endblock %}

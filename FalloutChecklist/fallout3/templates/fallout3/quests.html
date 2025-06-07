@@ -1,0 +1,95 @@
+{% extends "fallout3_base.html" %}
+
+{% block title %}Fallout 3 - Quests{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Quests</h2>
+{% for title, quests in grouped.items %}
+  <div class="quest-section">
+    <div class="quest-banner">
+      {{ title }}
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Available</th>
+            <th>Acquired</th>
+            <th>Location</th>
+            <th>Found</th>
+            <th>Complete</th>
+            <th>Repeatable</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for quest in quests %}
+          <tr>
+            <td>{{ quest.id }}</td>
+            <td>{{ quest.name }}</td>
+            <td>{{ quest.available }}</td>
+            <td>{{ quest.acquired }}</td>
+            <td>{{ quest.location }}</td>
+            <td>
+              <input type="checkbox" class="quest-toggle" data-id="{{ quest.id }}" data-field="found" {% if quest.found %}checked{% endif %}>
+            </td>
+            <td>
+              <input type="checkbox" class="quest-toggle" data-id="{{ quest.id }}" data-field="completed" {% if quest.completed %}checked{% endif %}>
+            </td>
+            <td>{% if quest.repeatable %}Yes{% else %}No{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% empty %}
+  <p>No quests found.</p>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function() {
+    $(".quest-toggle").change(function() {
+        var questId = $(this).data("id");
+        var field = $(this).data("field");
+        var value = $(this).is(":checked");
+        $.ajax({
+            url: "{% url 'toggle_quest_field' %}",
+            method: "POST",
+            data: {
+                'id': questId,
+                'field': field,
+                'value': value,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                // Optionally show a success message
+            },
+            error: function() {
+                alert("Failed to update quest!");
+            }
+        });
+    });
+});
+</script>
+<script>
+$(document).ready(function() {
+    // For each datatable on the page, add reset button and enable sorting
+    $('.datatable').each(function() {
+        var table = $(this).DataTable({
+            "order": [[0, "asc"]],
+            "paging": false,
+        });
+        // Add a "Reset Order" button above each table
+        var $resetBtn = $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>');
+        $resetBtn.insertBefore($(this));
+        $resetBtn.click(function() {
+            table.order([0, 'asc']).draw();
+        });
+    });
+});
+</script>
+{% endblock %}
