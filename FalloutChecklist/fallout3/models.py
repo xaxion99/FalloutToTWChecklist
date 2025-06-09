@@ -90,3 +90,14 @@ class TeddyBear(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.location}"
+
+
+class Achievement(models.Model):
+    title = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    requirement = models.TextField(blank=True)
+    points = models.IntegerField(default=0)
+    unlocked = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.title} - {self.name}"

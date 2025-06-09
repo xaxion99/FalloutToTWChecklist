@@ -21,4 +21,6 @@ urlpatterns = [
     path('weapons/toggle/', views.toggle_weapon_field, name='toggle_weapon_field'),
     path('teddybears/', views.fallout3_teddybears, name='fallout3_teddybears'),
     path('teddybears/update/', views.update_teddybear_count, name='update_teddybear_count'),
+    path('achievements/', views.fallout3_achievements, name='fallout3_achievements'),
+    path('achievements/toggle/', views.toggle_achievement_field, name='toggle_achievement_field'),
 ]

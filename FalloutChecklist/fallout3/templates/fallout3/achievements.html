@@ -1,0 +1,76 @@
+{% extends "fallout3_base.html" %}
+
+{% block title %}Fallout 3 - Achievements{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Achievements</h2>
+{% for title, achievements in grouped.items %}
+  <div class="quest-section">
+    <div class="quest-banner">
+      {{ title }}
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle datatable">
+        <thead class="thead-light">
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Unlocked</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ach in achievements %}
+          <tr>
+            <td>{{ ach.id }}</td>
+            <td>{{ ach.name }}</td>
+            <td>{{ ach.description }}</td>
+            <td>
+              <input type="checkbox" class="achievement-toggle" data-id="{{ ach.id }}" {% if ach.unlocked %}checked{% endif %}>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function() {
+    $(".achievement-toggle").change(function() {
+        var achievementId = $(this).data("id");
+        var value = $(this).is(":checked");
+        $.ajax({
+            url: "{% url 'toggle_achievement_field' %}",
+            method: "POST",
+            data: {
+                'id': achievementId,
+                'value': value,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                // Optionally show a success message
+            },
+            error: function() {
+                alert("Failed to update achievement!");
+            }
+        });
+    });
+
+    $('.datatable').each(function() {
+        var table = $(this).DataTable({
+            "order": [[0, "asc"]],
+            "paging": false,
+        });
+        var $resetBtn = $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>');
+        $resetBtn.insertBefore($(this));
+        $resetBtn.click(function() {
+            table.order([0, 'asc']).draw();
+        });
+    });
+});
+</script>
+{% endblock %}

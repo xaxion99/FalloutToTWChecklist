@@ -2,7 +2,7 @@ from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from .models import Quest, Bobblehead, SkillBook, RareItem, AlienCaptiveLog, NukaColaQuantum, Clothing, Weapon, \
-    TeddyBear
+    TeddyBear, Achievement
 
 
 class QuestResource(resources.ModelResource):
@@ -102,3 +102,15 @@ class TeddyBearAdmin(ImportExportModelAdmin):
     resource_class = TeddyBearResource
     list_display = ('title', 'location', 'count_found', 'count_total')
     list_filter = ('title',)
+
+
+class AchievementResource(resources.ModelResource):
+    class Meta:
+        model = Achievement
+
+@admin.register(Achievement)
+class AchievementAdmin(ImportExportModelAdmin):
+    resource_class = AchievementResource
+    list_display = ('title', 'name', 'unlocked')
+    search_fields = ('title', 'name')
+    list_filter = ('unlocked',)

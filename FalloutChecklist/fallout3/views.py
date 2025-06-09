@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
 from .models import Quest, Bobblehead, SkillBook, RareItem, AlienCaptiveLog, NukaColaQuantum, Clothing, Weapon, \
-    TeddyBear
+    TeddyBear, Achievement
 
 FALLOUT3_MENU_ITEMS = [
     ("Quests", "fallout3_quests"),
@@ -17,6 +17,7 @@ FALLOUT3_MENU_ITEMS = [
     ("Clothing", "fallout3_clothing"),
     ("Weapons", "fallout3_weapons"),
     ("Teddy Bears", "fallout3_teddybears"),
+    ("Achievements/Trophies", "fallout3_achievements"),
 ]
 
 
@@ -259,3 +260,28 @@ def update_teddybear_count(request):
         return JsonResponse({"success": True, "count_found": bear.count_found})
     except TeddyBear.DoesNotExist:
         return JsonResponse({"success": False, "error": "Teddy Bear not found"}, status=404)
+
+
+def fallout3_achievements(request):
+    achievements = Achievement.objects.all().order_by('id')
+    grouped = {}
+    for a in achievements:
+        grouped.setdefault(a.title, []).append(a)
+    return render(request, "fallout3/achievements.html", {
+        "grouped": grouped,
+        "menu_items": FALLOUT3_MENU_ITEMS,
+        "active_menu": "fallout3_achievements",
+    })
+
+
+@require_POST
+def toggle_achievement_field(request):
+    achievement_id = request.POST.get("id")
+    value = request.POST.get("value") == "true"
+    try:
+        achievement = Achievement.objects.get(id=achievement_id)
+        achievement.unlocked = value
+        achievement.save()
+        return JsonResponse({"success": True})
+    except Achievement.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Achievement not found"}, status=404)
