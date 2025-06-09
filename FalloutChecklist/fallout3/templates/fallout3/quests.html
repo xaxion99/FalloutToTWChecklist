@@ -15,12 +15,12 @@
           <tr>
             <th>ID</th>
             <th>Name</th>
-            <th>Available</th>
+            <th>Note</th>
             <th>Acquired</th>
             <th>Location</th>
+            <th>Rewards</th>
             <th>Found</th>
             <th>Complete</th>
-            <th>Repeatable</th>
           </tr>
         </thead>
         <tbody>
@@ -28,16 +28,16 @@
           <tr>
             <td>{{ quest.id }}</td>
             <td>{{ quest.name }}</td>
-            <td>{{ quest.available }}</td>
+            <td>{{ quest.note }}</td>
             <td>{{ quest.acquired }}</td>
             <td>{{ quest.location }}</td>
+            <td>{{ quest.rewards }}</td>
             <td>
               <input type="checkbox" class="quest-toggle" data-id="{{ quest.id }}" data-field="found" {% if quest.found %}checked{% endif %}>
             </td>
             <td>
               <input type="checkbox" class="quest-toggle" data-id="{{ quest.id }}" data-field="completed" {% if quest.completed %}checked{% endif %}>
             </td>
-            <td>{% if quest.repeatable %}Yes{% else %}No{% endif %}</td>
           </tr>
           {% endfor %}
         </tbody>

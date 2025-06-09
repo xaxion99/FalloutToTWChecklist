@@ -12,8 +12,8 @@ class QuestResource(resources.ModelResource):
 @admin.register(Quest)
 class QuestAdmin(ImportExportModelAdmin):
     resource_class = QuestResource
-    list_display = ('title', 'name', 'found', 'completed', 'repeatable')
-    list_filter = ('found', 'completed', 'repeatable')
+    list_display = ('title', 'name', 'found', 'completed')
+    list_filter = ('found', 'completed')
 
 
 class BobbleheadResource(resources.ModelResource):

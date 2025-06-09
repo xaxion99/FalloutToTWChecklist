@@ -4,12 +4,12 @@ from django.db import models
 class Quest(models.Model):
     title = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
-    available = models.TextField(blank=True, null=True)
+    note = models.TextField(blank=True, null=True)
     acquired = models.TextField(blank=True, null=True)
     location = models.TextField(blank=True, null=True)
+    rewards = models.TextField(blank=True, null=True)
     found = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
-    repeatable = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
