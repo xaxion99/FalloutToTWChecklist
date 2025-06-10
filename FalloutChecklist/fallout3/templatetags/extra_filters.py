@@ -8,3 +8,8 @@ def chunks(lst, n):
     n = int(n)
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
+
+
+@register.filter
+def dict_get(d, key):
+    return d.get(key)

@@ -3,6 +3,7 @@ from . import views
 
 
 urlpatterns = [
+    path('', views.fallout3_dashboard, name="fallout3_dashboard"),
     path('quests/', views.fallout3_quests, name='fallout3_quests'),
     path('quests/toggle/', views.toggle_quest_field, name='toggle_quest_field'),
     path('bobbleheads/', views.fallout3_bobbleheads, name='fallout3_bobbleheads'),

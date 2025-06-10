@@ -1,0 +1,45 @@
+{% extends "fallout3_base.html" %}
+{% block title %}Fallout 3 - Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mt-4">Fallout 3 - Collection Dashboard</h2>
+
+<div class="dashboard-banner mb-4">
+    <span class="font-weight-bold">Overall Completion</span>
+    <span class="dashboard-main-stats">
+        {{ total_completed }} / {{ total_items }} = {{ total_percent }}%
+    </span>
+</div>
+
+<div class="table-responsive">
+    <table class="table dashboard-table align-middle table-bordered">
+        <thead>
+            <tr>
+                <th>Section</th>
+                <th>Completed / Total</th>
+                <th>% Complete</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for s in sections %}
+            <tr>
+                <td class="font-weight-bold">{{ s.label }}</td>
+                <td>{{ s.x }} / {{ s.y }}</td>
+                <td>
+                    <div class="progress dashboard-progress-bar">
+                        <div class="progress-bar"
+                             role="progressbar"
+                             style="width: {{ s.percent }}%; background: linear-gradient(90deg,#073605 0%,#146c11 100%);"
+                             aria-valuenow="{{ s.percent }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            {{ s.percent }}%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -3,20 +3,32 @@
 {% block title %}Fallout 3 - Achievements{% endblock %}
 
 {% block content %}
+{% load extra_filters %}
 <h2 class="mt-4">Fallout 3 - Achievements</h2>
+<div class="dashboard-banner mb-4">
+    <span class="font-weight-bold">Overall Acquired</span>
+    <span>{{ total_acquired }} / {{ total_items }} = {{ overall_percent }}%</span>
+    <span class="font-weight-bold ml-5">G</span>
+    <span>{{ total_points_acquired }} / {{ total_points }}</span>
+</div>
 {% for title, achievements in grouped.items %}
   <div class="quest-section">
-    <div class="quest-banner">
-      {{ title }}
+    {% with stat=section_stats|dict_get:title %}
+    <div class="dashboard-banner mb-4">
+        <span class="font-weight-bold">{{ title }}</span>
+        <span>{{ stat.acquired }} / {{ stat.count }} = {{ stat.percent }}%</span>
+        <span class="font-weight-bold ml-5">G</span>
+        <span>{{ stat.points_acquired }} / {{ stat.points_total }}</span>
     </div>
+    {% endwith %}
     <div class="table-responsive">
       <table class="table table-bordered table-sm align-middle datatable">
         <thead class="thead-light">
           <tr>
             <th>ID</th>
             <th>Name</th>
-            <th>Description</th>
-            <th>Unlocked</th>
+            <th>Requirement</th>
+            <th>Acquired</th>
           </tr>
         </thead>
         <tbody>
@@ -24,7 +36,7 @@
           <tr>
             <td>{{ ach.id }}</td>
             <td>{{ ach.name }}</td>
-            <td>{{ ach.description }}</td>
+            <td>{{ ach.requirement }}</td>
             <td>
               <input type="checkbox" class="achievement-toggle" data-id="{{ ach.id }}" {% if ach.unlocked %}checked{% endif %}>
             </td>

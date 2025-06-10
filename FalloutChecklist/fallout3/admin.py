@@ -111,6 +111,6 @@ class AchievementResource(resources.ModelResource):
 @admin.register(Achievement)
 class AchievementAdmin(ImportExportModelAdmin):
     resource_class = AchievementResource
-    list_display = ('title', 'name', 'unlocked')
+    list_display = ('title', 'name', 'acquired')
     search_fields = ('title', 'name')
-    list_filter = ('unlocked',)
+    list_filter = ('acquired',)
