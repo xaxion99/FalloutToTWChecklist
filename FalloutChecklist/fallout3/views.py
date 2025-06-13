@@ -597,38 +597,37 @@ def calculate_weapon_stats(queryset, section_field="title", acquired_field="acqu
 
 ### Teddy Bears ########################################################################################################
 def fallout3_teddybears(request):
-    bears = TeddyBear.objects.all().order_by('id')
-    grouped = OrderedDict()
-    section_stats = {}
-    total_found = 0
-    total_total = 0
-
-    for bear in bears:
-        grouped.setdefault(bear.title, []).append(bear)
-    for title, items in grouped.items():
-        found = sum(b.count_found for b in items)
-        count = sum(b.count_total for b in items)
-        percent = round(100 * found / count) if count else 0
-
-        section_stats[title] = {
-            "found": found,
-            "count": count,
-            "percent": percent,
-        }
-        total_found += found
-        total_total += count
-
-    overall_percent = round(100 * total_found / total_total) if total_total else 0
-
+    stats = calculate_teddybear_stats()
     return render(request, "fallout3/teddybears.html", {
-        "grouped": grouped,
-        "section_stats": section_stats,
-        "total_found": total_found,
-        "total_total": total_total,
-        "overall_percent": overall_percent,
+        **stats,
         "menu_items": FALLOUT3_MENU_ITEMS,
         "active_menu": "fallout3_teddybears",
     })
+
+
+@require_POST
+def update_nukacola_count(request):
+    quantum_id = request.POST.get("id")
+    direction = request.POST.get("direction")
+    try:
+        quantum = NukaColaQuantum.objects.get(id=quantum_id)
+        if direction == "up" and quantum.count_found < quantum.count_total:
+            quantum.count_found += 1
+            quantum.save()
+        elif direction == "down" and quantum.count_found > 0:
+            quantum.count_found -= 1
+            quantum.save()
+        stats = calculate_nukacola_stats()
+        return JsonResponse({
+            "success": True,
+            "count_found": quantum.count_found,
+            "total_found": stats["total_found"],
+            "total_total": stats["total_total"],
+            "overall_percent": stats["overall_percent"],
+            "section_stats": stats["section_stats"],
+        })
+    except NukaColaQuantum.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Nuka Cola Quantum not found"}, status=404)
 
 
 @require_POST
@@ -643,13 +642,81 @@ def update_teddybear_count(request):
         elif direction == "down" and bear.count_found > 0:
             bear.count_found -= 1
             bear.save()
-        return JsonResponse({"success": True, "count_found": bear.count_found})
+        stats = calculate_teddybear_stats()
+        return JsonResponse({
+            "success": True,
+            "count_found": bear.count_found,
+            "total_found": stats["total_found"],
+            "total_total": stats["total_total"],
+            "overall_percent": stats["overall_percent"],
+            "section_stats": stats["section_stats"],
+        })
     except TeddyBear.DoesNotExist:
         return JsonResponse({"success": False, "error": "Teddy Bear not found"}, status=404)
 
 
+def calculate_teddybear_stats():
+    bears = TeddyBear.objects.all().order_by('id')
+    grouped = OrderedDict()
+    section_stats = {}
+
+    total_found = 0
+    total_total = 0
+
+    for b in bears:
+        grouped.setdefault(b.title, []).append(b)
+    for title, bs in grouped.items():
+        found = sum(b.count_found for b in bs)
+        count = sum(b.count_total for b in bs)
+        percent = round(100 * found / count) if count else 0
+        section_stats[title] = {"found": found, "count": count, "percent": percent}
+        total_found += found
+        total_total += count
+
+    overall_percent = round(100 * total_found / total_total) if total_total else 0
+
+    return {
+        "grouped": grouped,
+        "section_stats": section_stats,
+        "total_found": total_found,
+        "total_total": total_total,
+        "overall_percent": overall_percent,
+    }
+
+
 ### Achievements #######################################################################################################
 def fallout3_achievements(request):
+    stats = calculate_achievement_stats()
+    return render(request, "fallout3/achievements.html", {
+        **stats,
+        "menu_items": FALLOUT3_MENU_ITEMS,
+        "active_menu": "fallout3_achievements",
+    })
+
+
+@require_POST
+def toggle_achievement_field(request):
+    achievement_id = request.POST.get("id")
+    value = request.POST.get("value") == "true"
+    try:
+        achievement = Achievement.objects.get(id=achievement_id)
+        achievement.acquired = value
+        achievement.save()
+        stats = calculate_achievement_stats()
+        return JsonResponse({
+            "success": True,
+            "total_acquired": stats["total_acquired"],
+            "total_items": stats["total_items"],
+            "overall_percent": stats["overall_percent"],
+            "total_points_acquired": stats["total_points_acquired"],
+            "total_points": stats["total_points"],
+            "section_stats": stats["section_stats"],
+        })
+    except Achievement.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Achievement not found"}, status=404)
+
+
+def calculate_achievement_stats():
     achievements = Achievement.objects.all().order_by('id')
     grouped = OrderedDict()
     section_stats = {}
@@ -679,9 +746,8 @@ def fallout3_achievements(request):
         total_points += points_total
 
     overall_percent = round(100 * total_acquired / total_items) if total_items else 0
-    overall_points_percent = round(100 * total_points_acquired / total_points) if total_points else 0
 
-    return render(request, "fallout3/achievements.html", {
+    return {
         "grouped": grouped,
         "section_stats": section_stats,
         "total_acquired": total_acquired,
@@ -689,20 +755,4 @@ def fallout3_achievements(request):
         "overall_percent": overall_percent,
         "total_points_acquired": total_points_acquired,
         "total_points": total_points,
-        "overall_points_percent": overall_points_percent,
-        "menu_items": FALLOUT3_MENU_ITEMS,
-        "active_menu": "fallout3_achievements",
-    })
-
-
-@require_POST
-def toggle_achievement_field(request):
-    achievement_id = request.POST.get("id")
-    value = request.POST.get("value") == "true"
-    try:
-        achievement = Achievement.objects.get(id=achievement_id)
-        achievement.acquired = value
-        achievement.save()
-        return JsonResponse({"success": True})
-    except Achievement.DoesNotExist:
-        return JsonResponse({"success": False, "error": "Achievement not found"}, status=404)
+    }

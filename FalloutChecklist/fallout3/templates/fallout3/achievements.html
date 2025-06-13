@@ -9,30 +9,39 @@
     <div class="dashboard-banner-group">
         <span class="font-weight-bold">Overall: </span>
         <span class="dashboard-main-stats">
-            {{ total_acquired }} / {{ total_items }} = {{ overall_percent }}%
+            <span id="total-acquired">{{ total_acquired }}</span> /
+            <span id="total-items">{{ total_items }}</span>
+            = <span id="overall-percent">{{ overall_percent }}</span>%
         </span>
     </div>
     <div class="dashboard-banner-group">
         <span class="font-weight-bold ml-5">G: </span>
         <span class="dashboard-main-stats">
-            {{ total_points_acquired }} / {{ total_points }}
+            <span id="total-points-acquired">{{ total_points_acquired }}</span> /
+            <span id="total-points">{{ total_points }}</span>
         </span>
     </div>
 </div>
 {% for title, achievements in grouped.items %}
+  {% with stat=section_stats|dict_get:title %}
   <div class="quest-section">
-    {% with stat=section_stats|dict_get:title %}
     <div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center">
-        <div class="dashboard-banner-group">
+        <div class="dashboard-banner-group" id="section-{{ title|slugify }}">
             <span>{{ title }}: </span>
-            <span>{{ stat.acquired }} / {{ stat.count }} = {{ stat.percent }}%</span>
+            <span>
+                <span class="section-acquired">{{ stat.acquired }}</span> /
+                <span class="section-count">{{ stat.count }}</span>
+                = <span class="section-percent">{{ stat.percent }}</span>%
+            </span>
         </div>
         <div class="dashboard-banner-group">
             <span>G: </span>
-            <span>{{ stat.points_acquired }} / {{ stat.points_total }}</span>
+            <span>
+                <span class="section-points-acquired">{{ stat.points_acquired }}</span> /
+                <span class="section-points">{{ stat.points_total }}</span>
+            </span>
         </div>
     </div>
-    {% endwith %}
     <div class="table-responsive">
       <table class="table table-bordered table-sm align-middle datatable">
         <thead class="thead-light">
@@ -60,6 +69,7 @@
       </table>
     </div>
   </div>
+  {% endwith %}
 {% endfor %}
 {% endblock %}
 
@@ -78,7 +88,27 @@ $(function() {
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function(data) {
-                // Optionally show a success message
+                if (data.success) {
+                    // Update overall stats
+                    $("#total-acquired").text(data.total_acquired);
+                    $("#total-items").text(data.total_items);
+                    $("#overall-percent").text(data.overall_percent);
+                    $("#total-points-acquired").text(data.total_points_acquired);
+                    $("#total-points").text(data.total_points);
+
+                    // Update section stats
+                    if (data.section_stats) {
+                        for (const [title, stats] of Object.entries(data.section_stats)) {
+                            const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                            const section = $(`#section-${slug}`);
+                            section.find('.section-acquired').text(stats.acquired);
+                            section.find('.section-count').text(stats.count);
+                            section.find('.section-percent').text(stats.percent);
+                            section.next().find('.section-points-acquired').text(stats.points_acquired);
+                            section.next().find('.section-points').text(stats.points_total);
+                        }
+                    }
+                }
             },
             error: function() {
                 alert("Failed to update achievement!");
