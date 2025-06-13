@@ -1,12 +1,24 @@
 {% extends "fallout3_base.html" %}
+{% load extra_filters %}
 
 {% block title %}Fallout 3 - Skill Books{% endblock %}
 
 {% block content %}
 <h2 class="mt-4">Fallout 3 - Skill Books</h2>
-<div class="skillbook-banner">
-    Skill Books
+
+<div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center">
+    <div class="dashboard-banner-group">
+        <span class="font-weight-bold">Overall: </span>
+        <span class="dashboard-main-stats">
+            <span id="total-found">{{ total_found }}</span> /
+            <span id="total-skillbooks">{{ total }}</span>
+            = <span id="overall-percent">{{ overall_percent }}</span>%
+        </span>
+    </div>
+    <div class="dashboard-banner-group"></div>
 </div>
+
+
 <div class="table-responsive">
     <table class="table table-bordered table-sm align-middle datatable">
         <thead class="thead-light">
@@ -59,8 +71,12 @@ $(function() {
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function(data) {
-                    if(data.success){
+                    if (data.success) {
                         valueInput.val(data.count_found);
+                        // Live update the stats
+                        $("#total-found").text(data.total_found);
+                        $("#total-skillbooks").text(data.total);
+                        $("#overall-percent").text(data.overall_percent);
                         if(data.count_found <= 0) minusBtn.prop('disabled', true);
                         else minusBtn.prop('disabled', false);
                         if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))
@@ -82,8 +98,12 @@ $(function() {
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function(data) {
-                    if(data.success){
+                    if (data.success) {
                         valueInput.val(data.count_found);
+                        // Live update the stats
+                        $("#total-found").text(data.total_found);
+                        $("#total-skillbooks").text(data.total);
+                        $("#overall-percent").text(data.overall_percent);
                         if(data.count_found <= 0) minusBtn.prop('disabled', true);
                         else minusBtn.prop('disabled', false);
                         if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))

@@ -4,9 +4,19 @@
 
 {% block content %}
 <h2 class="mt-4">Fallout 3 - Bobbleheads</h2>
-<div class="bobblehead-banner">
-    Bobbleheads
+
+<div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center">
+    <div class="dashboard-banner-group">
+        <span class="font-weight-bold">Overall: </span>
+        <span class="dashboard-main-stats">
+            <span id="total-acquired">{{ total_acquired }}</span> /
+            <span id="total-items">{{ total_items }}</span>
+            = <span id="overall-percent">{{ overall_percent }}</span>%
+        </span>
+    </div>
+    <div class="dashboard-banner-group"></div>
 </div>
+
 <div class="table-responsive">
     <table class="table table-bordered table-sm align-middle datatable">
         <thead class="thead-light">
@@ -48,7 +58,11 @@ $(function() {
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function(data) {
-                // Optionally show a success message
+                if (data.success) {
+                    $("#total-acquired").text(data.total_acquired);
+                    $("#total-items").text(data.total_items);
+                    $("#overall-percent").text(data.overall_percent);
+                }
             },
             error: function() {
                 alert("Failed to update bobblehead!");

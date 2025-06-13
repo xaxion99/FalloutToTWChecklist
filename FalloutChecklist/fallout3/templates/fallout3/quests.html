@@ -1,13 +1,42 @@
 {% extends "fallout3_base.html" %}
+{% load extra_filters %}
 
 {% block title %}Fallout 3 - Quests{% endblock %}
 
 {% block content %}
 <h2 class="mt-4">Fallout 3 - Quests</h2>
+
+<div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center">
+    <div class="dashboard-banner-group">
+        <span class="font-weight-bold">Overall Found:</span>
+        <span id="overall-found" class="dashboard-main-stats">
+            {{ total_found }} / {{ total_quests }} = {{ overall_found_percent }}%
+        </span>
+    </div>
+    <div class="dashboard-banner-group">
+        <span class="font-weight-bold">Overall Completed:</span>
+        <span id="overall-completed" class="dashboard-main-stats">
+            {{ total_completed }} / {{ total_quests }} = {{ overall_completed_percent }}%
+        </span>
+    </div>
+</div>
+
 {% for title, quests in grouped.items %}
+  {% with stat=section_stats|dict_get:title %}
   <div class="quest-section">
-    <div class="quest-banner">
-      {{ title }}
+    <div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center">
+        <div class="dashboard-banner-group">
+            <span>{{ title }} - Found:</span>
+            <span id="found-{{ forloop.counter0 }}" class="section-found">
+                {{ stat.found }} / {{ stat.count }} = {{ stat.found_percent }}%
+            </span>
+        </div>
+        <div class="dashboard-banner-group">
+            <span>{{ title }} - Completed:</span>
+            <span id="completed-{{ forloop.counter0 }}" class="section-completed">
+                {{ stat.completed }} / {{ stat.count }} = {{ stat.completed_percent }}%
+            </span>
+        </div>
     </div>
     <div class="table-responsive">
       <table class="table table-bordered table-sm align-middle datatable">
@@ -44,6 +73,7 @@
       </table>
     </div>
   </div>
+  {% endwith %}
 {% empty %}
   <p>No quests found.</p>
 {% endfor %}
@@ -66,24 +96,38 @@ $(function() {
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function(data) {
-                // Optionally show a success message
+                if (data.success) {
+                    // Update overall stats
+                    $('#overall-found').text(
+                        data.total_found + ' / ' + data.total_quests + ' = ' + data.overall_found_percent + '%'
+                    );
+                    $('#overall-completed').text(
+                        data.total_completed + ' / ' + data.total_quests + ' = ' + data.overall_completed_percent + '%'
+                    );
+                    // Update each section's stats
+                    let i = 0;
+                    for (const [title, stat] of Object.entries(data.section_stats)) {
+                        $('#found-' + i).text(
+                            stat.found + ' / ' + stat.count + ' = ' + stat.found_percent + '%'
+                        );
+                        $('#completed-' + i).text(
+                            stat.completed + ' / ' + stat.count + ' = ' + stat.completed_percent + '%'
+                        );
+                        i++;
+                    }
+                }
             },
             error: function() {
                 alert("Failed to update quest!");
             }
         });
     });
-});
-</script>
-<script>
-$(document).ready(function() {
-    // For each datatable on the page, add reset button and enable sorting
+
     $('.datatable').each(function() {
         var table = $(this).DataTable({
             "order": [[0, "asc"]],
             "paging": false,
         });
-        // Add a "Reset Order" button above each table
         var $resetBtn = $('<button class="btn btn-secondary btn-sm mb-2">Reset Order</button>');
         $resetBtn.insertBefore($(this));
         $resetBtn.click(function() {

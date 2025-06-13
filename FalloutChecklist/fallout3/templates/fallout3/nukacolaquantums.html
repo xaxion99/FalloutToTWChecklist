@@ -1,13 +1,38 @@
 {% extends "fallout3_base.html" %}
+{% load extra_filters %}
 
 {% block title %}Fallout 3 - Nuka Cola Quantums{% endblock %}
 
 {% block content %}
 <h2 class="mt-4">Fallout 3 - Nuka Cola Quantums</h2>
+
+<div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center">
+    <div class="dashboard-banner-group">
+        <span class="font-weight-bold">Overall: </span>
+        <span class="dashboard-main-stats">
+            <span id="total-found">{{ total_found }}</span> /
+            <span id="total-total">{{ total_total }}</span>
+            = <span id="overall-percent">{{ overall_percent }}</span>%
+        </span>
+    </div>
+    <div class="dashboard-banner-group">
+        {# Right side intentionally left blank for alignment #}
+    </div>
+</div>
+
 {% for title, quantums in grouped.items %}
+  {% with stat=section_stats|dict_get:title %}
   <div class="quest-section">
-    <div class="quest-banner">
-      {{ title }}
+    <div class="dashboard-banner mb-4 d-flex justify-content-between align-items-center">
+        <div class="dashboard-banner-group" id="section-{{ title|slugify }}">
+            <span>{{ title }}: </span>
+            <span>
+                <span class="section-found">{{ stat.found }}</span> /
+                <span class="section-count">{{ stat.count }}</span>
+                = <span class="section-percent">{{ stat.percent }}</span>%
+            </span>
+        </div>
+        <div class="dashboard-banner-group"></div>
     </div>
     <div class="table-responsive">
       <table class="table table-bordered table-sm align-middle datatable">
@@ -38,6 +63,7 @@
       </table>
     </div>
   </div>
+  {% endwith %}
 {% endfor %}
 {% endblock %}
 
@@ -51,6 +77,38 @@ $(function() {
         var plusBtn = controls.find(".plus");
         var valueInput = controls.find(".count-value");
 
+        function updateStats(data) {
+            if (data.success) {
+                valueInput.val(data.count_found);
+
+                // Find the "max" (count_total) for this row
+                var max = parseInt(controls.closest('tr').find('td:last').text(), 10);
+                // Enable/disable minus button
+                if (data.count_found <= 0) minusBtn.prop('disabled', true);
+                else minusBtn.prop('disabled', false);
+                // Enable/disable plus button
+                if (data.count_found >= max) plusBtn.prop('disabled', true);
+                else plusBtn.prop('disabled', false);
+
+                // Update overall stats
+                $("#total-found").text(data.total_found);
+                $("#total-total").text(data.total_total);
+                $("#overall-percent").text(data.overall_percent);
+
+                // Update section stats (unchanged)
+                if (data.section_stats) {
+                    for (const [title, stats] of Object.entries(data.section_stats)) {
+                        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                        const section = $(`#section-${slug}`);
+                        section.find('.section-found').text(stats.found);
+                        section.find('.section-count').text(stats.count);
+                        section.find('.section-percent').text(stats.percent);
+                    }
+                }
+            }
+        }
+
+
         minusBtn.click(function() {
             $.ajax({
                 url: "{% url 'update_nukacola_count' %}",
@@ -60,17 +118,7 @@ $(function() {
                     'direction': 'down',
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
-                success: function(data) {
-                    if(data.success){
-                        valueInput.val(data.count_found);
-                        if(data.count_found <= 0) minusBtn.prop('disabled', true);
-                        else minusBtn.prop('disabled', false);
-                        if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))
-                            plusBtn.prop('disabled', true);
-                        else
-                            plusBtn.prop('disabled', false);
-                    }
-                }
+                success: updateStats
             });
         });
 
@@ -83,17 +131,7 @@ $(function() {
                     'direction': 'up',
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
-                success: function(data) {
-                    if(data.success){
-                        valueInput.val(data.count_found);
-                        if(data.count_found <= 0) minusBtn.prop('disabled', true);
-                        else minusBtn.prop('disabled', false);
-                        if(data.count_found >= parseInt(controls.closest('tr').find('td:last').text()))
-                            plusBtn.prop('disabled', true);
-                        else
-                            plusBtn.prop('disabled', false);
-                    }
-                }
+                success: updateStats
             });
         });
     });
