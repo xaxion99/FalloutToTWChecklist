@@ -8,7 +8,7 @@ pip install -r requirements.txt
 cd FalloutChecklist
 
 # Start the Django server in the background
-python manage.py runserver &
+python manage.py runserver 0.0.0.0:8000 &
 
 # Wait a bit for the server to start (adjust the sleep if needed)
 sleep 2

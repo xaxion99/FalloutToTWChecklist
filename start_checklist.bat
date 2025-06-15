@@ -7,6 +7,6 @@ pip install -r requirements.txt
 cd FalloutChecklist
 
 REM Start Django server in a new window and open browser
-start "" python manage.py runserver
+start "" python manage.py runserver 0.0.0.0:8000
 start http://127.0.0.1:8000/
 pause
