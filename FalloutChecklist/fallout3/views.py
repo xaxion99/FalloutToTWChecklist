@@ -130,8 +130,6 @@ def fallout3_dashboard(request):
     points_total = achievements.aggregate(total=Sum('points'))['total'] or 0
     points_percent = round(100 * points_acquired / points_total) if points_total else 0
     sections.append({"label": "Gamer Score", "x": points_acquired, "y": points_total, "percent": points_percent})
-    total_completed += acquired
-    total_items += count
 
     # Final overall stats
     total_percent = round(100 * total_completed / total_items) if total_items else 0
