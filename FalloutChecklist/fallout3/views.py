@@ -604,31 +604,6 @@ def fallout3_teddybears(request):
 
 
 @require_POST
-def update_nukacola_count(request):
-    quantum_id = request.POST.get("id")
-    direction = request.POST.get("direction")
-    try:
-        quantum = NukaColaQuantum.objects.get(id=quantum_id)
-        if direction == "up" and quantum.count_found < quantum.count_total:
-            quantum.count_found += 1
-            quantum.save()
-        elif direction == "down" and quantum.count_found > 0:
-            quantum.count_found -= 1
-            quantum.save()
-        stats = calculate_nukacola_stats()
-        return JsonResponse({
-            "success": True,
-            "count_found": quantum.count_found,
-            "total_found": stats["total_found"],
-            "total_total": stats["total_total"],
-            "overall_percent": stats["overall_percent"],
-            "section_stats": stats["section_stats"],
-        })
-    except NukaColaQuantum.DoesNotExist:
-        return JsonResponse({"success": False, "error": "Nuka Cola Quantum not found"}, status=404)
-
-
-@require_POST
 def update_teddybear_count(request):
     bear_id = request.POST.get("id")
     direction = request.POST.get("direction")
